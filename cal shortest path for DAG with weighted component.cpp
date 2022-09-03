@@ -1,71 +1,61 @@
-#include<bits/stdc++.h>
-using namespace std;
+#include <bits/stdc++.h> 
+#define INF INT_MAX 
+using namespace std; 
 
- // } Driver Code Ends
-
-
-class Solution {
-
-public:
-    bool checkForCycle(int s, int V, vector<int> adj[], vector<int>& visited)
-    {
-        vector<int> parent(V, -1);
-     
-        // Create a queue for BFS
-        queue<pair<int,int>> q;
-     
-        visited[s] = true;
-        q.push({s, -1});
-     
-        while (!q.empty()) {
-     
-            int node = q.front().first;
-            int par = q.front().second;
-            q.pop();
-     
-            for (auto it : adj[node]) {
-                if (!visited[it]) {
-                    visited[it] = true;
-                    q.push({it, node});
-                }
-                else if (par != it)
-                    return true;
-            }
+void findTopoSort(int node, int vis[], stack<int> &st, vector<pair<int,int>> adj[]) {
+    vis[node] = 1; 
+    for(auto it : adj[node]) {
+        if(!vis[it.first]) {
+            findTopoSort(it.first, vis, st, adj); 
         }
-        return false;
     }
-public:
-	bool isCycle(int V, vector<int>adj[]){
-	    vector<int> vis(V, 0); 
-	    for(int i = 0;i<V;i++) {
-	        if(!vis[i]) {
-	            if(checkForCycle(i, V, adj, vis)) return true; 
-	        }
-	    }
-	    
-	    return false; 
-	}
-};
+    st.push(node);
+}
 
-// { Driver Code Starts.
-int main(){
-	int tc;
-	cin >> tc;
-	while(tc--){
-		int V, E;
-		cin >> V >> E;
-		vector<int>adj[V];
-		for(int i = 0; i < E; i++){
-			int u, v;
-			cin >> u >> v;
-			adj[u].push_back(v);
-			adj[v].push_back(u);
+
+void shortestPath(int src, int N, vector<pair<int,int>> adj[]) 
+{ 
+	int vis[N] = {0};
+	stack<int> st; 
+	for (int i = 0; i < N; i++) 
+		if (!vis[i]) 
+			findTopoSort(i, vis, st, adj); 
+			
+	int dist[N]; 
+	for (int i = 0; i < N; i++) 
+		dist[i] = 1e9; 
+	dist[src] = 0; 
+
+	while(!st.empty()) 
+	{  
+		int node = st.top(); 
+		st.pop(); 
+ 
+		if (dist[node] != INF) {
+		    for(auto it : adj[node]) {
+		        if(dist[node] + it.second < dist[it.first]) {
+		            dist[it.first] = dist[node] + it.second; 
+		        }
+		    }
 		}
-		Solution obj;
-		bool ans = obj.isCycle(V, adj);
-		if(ans)
-			cout << "1\n";
-		else cout << "0\n";
+	} 
+
+	for (int i = 0; i < N; i++) 
+		(dist[i] == 1e9)? cout << "INF ": cout << dist[i] << " "; 
+} 
+
+int main() 
+{ 
+	int n, m;
+	cin >> n >> m;
+	vector<pair<int,int>> adj[n]; 
+	for(int i = 0;i<m;i++) {
+	    int u, v, wt;
+	    cin >> u >> v >> wt; 
+	    adj[u].push_back({v, wt}); 
 	}
-	return 0;
-}  // } Driver Code Ends
+	
+	shortestPath(0, n, adj); 
+
+	return 0; 
+} 
